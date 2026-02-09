@@ -1,3 +1,9 @@
+import javax.swing.JOptionPane;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
+import java.awt.event.ItemEvent;
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
@@ -14,8 +20,37 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
      */
     public KonversiSuhuFrame() {
         initComponents();
+        
+        // Memastikan hasilField tidak bisa diedit manual
+        hasilField.setEditable(false);
+        // Mengatur salah satu radio button sebagai default untuk UX yang lebih baik
+        rbCelsius.setSelected(true);
+        // Menambahkan listener otomatis untuk perubahan pilihan
+        tambahListenerOtomatis();
+        // Menambahkan validasi input tingkat lanjut (mencegah paste ilegal)
+        setupInputValidation();
     }
+    
+    /**
+     * Menambahkan listener agar konversi berjalan tanpa menekan tombol
+     */
+    private void tambahListenerOtomatis() 
+    {
+        // Listener untuk ComboBox asal
+        comboAsal.addItemListener((ItemEvent e) -> 
+        {
+            if (e.getStateChange() == ItemEvent.SELECTED) 
+            {
+                konversiSuhu();
+            }
+        });
 
+        // Listener untuk Radio Button tujuan
+        rbCelsius.addActionListener(e -> konversiSuhu());
+        rbFahrenheit.addActionListener(e -> konversiSuhu());
+        rbReamur.addActionListener(e -> konversiSuhu());
+        rbKelvin.addActionListener(e -> konversiSuhu());
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -30,16 +65,16 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         comboAsal = new javax.swing.JComboBox<>();
-        jLabel1 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        btnKonversi = new javax.swing.JButton();
         rbCelsius = new javax.swing.JRadioButton();
         txtInput = new javax.swing.JTextField();
         rbFahrenheit = new javax.swing.JRadioButton();
         rbReamur = new javax.swing.JRadioButton();
         rbKelvin = new javax.swing.JRadioButton();
-        lblHasil = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        hasilField = new javax.swing.JTextField();
+        btnReset = new javax.swing.JButton();
+        btnKeluar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -49,22 +84,13 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
 
         comboAsal.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Celsius", "Fahrenheit", "Reamur", "Kelvin" }));
 
-        jLabel1.setText("Masukkan nilai suhu:");
-
-        jLabel3.setText("Skala Asal:");
-
-        jLabel4.setText("Konversi Ke:");
-
-        btnKonversi.setText("Konversi");
-        btnKonversi.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnKonversiActionPerformed(evt);
-            }
-        });
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel3.setText("Input :");
 
         buttonGroup1.add(rbCelsius);
         rbCelsius.setText("Celsius");
 
+        txtInput.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         txtInput.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 txtInputKeyReleased(evt);
@@ -83,64 +109,78 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         buttonGroup1.add(rbKelvin);
         rbKelvin.setText("Kelvin");
 
-        lblHasil.setText("Hasil: -");
+        jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel5.setText("Hasil :");
+
+        hasilField.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+
+        btnReset.setText("Reset");
+        btnReset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnResetActionPerformed(evt);
+            }
+        });
+
+        btnKeluar.setText("Keluar");
+        btnKeluar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnKeluarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(36, 36, 36)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblHasil)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(btnKonversi, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel2Layout.createSequentialGroup()
-                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(jLabel3)
-                                .addComponent(jLabel1)
-                                .addComponent(jLabel4))
-                            .addGap(18, 18, 18)
-                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(comboAsal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(txtInput, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGroup(jPanel2Layout.createSequentialGroup()
-                                    .addComponent(rbCelsius)
-                                    .addGap(25, 25, 25)
-                                    .addComponent(rbReamur))
-                                .addGroup(jPanel2Layout.createSequentialGroup()
-                                    .addComponent(rbFahrenheit)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(rbKelvin))))))
-                .addContainerGap(39, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(rbCelsius)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(rbReamur)
+                .addGap(12, 12, 12)
+                .addComponent(rbFahrenheit)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(rbKelvin)
+                .addGap(0, 29, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(comboAsal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(txtInput, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(hasilField)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnReset)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnKeluar)))
+                .addGap(1, 1, 1))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(30, 30, 30)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
-                .addGap(16, 16, 16)
+                .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(comboAsal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
-                .addGap(17, 17, 17)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(rbCelsius)
-                            .addComponent(rbReamur))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(rbFahrenheit)
-                            .addComponent(rbKelvin))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnKonversi)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblHasil)
-                .addContainerGap(29, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtInput, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(28, 28, 28)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(rbCelsius)
+                    .addComponent(rbReamur)
+                    .addComponent(rbFahrenheit)
+                    .addComponent(rbKelvin))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(hasilField, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnReset)
+                    .addComponent(btnKeluar))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -150,8 +190,11 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(30, 30, 30)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 14, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -160,50 +203,111 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
                 .addGap(24, 24, 24)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    
+    /**
+     * Handler saat input diketik: menyaring karakter non-angka secara ketat
+     */
     private void txtInputKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtInputKeyTyped
         // TODO add your handling code here:
         char c = evt.getKeyChar();
-        if (!Character.isDigit(c) && c != '.' && c != '-') {
+        String currentText = txtInput.getText();
+
+        // Izinkan angka, titik, koma, minus, dan backspace
+        if (!Character.isDigit(c) && c != '.' && c != ',' && c != '-' && c != '\b') 
+        {
+            evt.consume();
+        }
+
+        // Cegah penggunaan dua tanda desimal (baik titik maupun koma)
+        if ((c == '.' || c == ',') && (currentText.contains(".") || currentText.contains(","))) 
+        {
             evt.consume();
         }
     }//GEN-LAST:event_txtInputKeyTyped
+    
 
-    private void btnKonversiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKonversiActionPerformed
-        // TODO add your handling code here:
-        konversiSuhu();
-    }//GEN-LAST:event_btnKonversiActionPerformed
-
+    /**
+     * Handler saat teks dilepas: memicu konversi otomatis 
+     */
     private void txtInputKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtInputKeyReleased
         // TODO add your handling code here:
         konversiSuhu();
     }//GEN-LAST:event_txtInputKeyReleased
 
-    private void konversiSuhu() {
-        try {
-            double nilai = Double.parseDouble(txtInput.getText());
-            String asal = comboAsal.getSelectedItem().toString();
-            String tujuan = getTujuan();
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        // TODO add your handling code here:
+        txtInput.setText("");
+        hasilField.setText("");
+        rbCelsius.setSelected(true);
+        comboAsal.setSelectedIndex(0);
+        txtInput.requestFocus();
+    }//GEN-LAST:event_btnResetActionPerformed
 
-            if (tujuan == null) {
-                lblHasil.setText("Pilih skala tujuan!");
+    private void btnKeluarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKeluarActionPerformed
+        // TODO add your handling code here:
+        // Menampilkan dialog konfirmasi Yes/No
+        int pilihan = JOptionPane.showConfirmDialog(
+            this, 
+            "Apakah Anda yakin ingin keluar?", 
+            "Konfirmasi Keluar", 
+            JOptionPane.YES_NO_OPTION
+        );
+
+        // Jika user memilih 'Yes' (OK), maka aplikasi ditutup
+        if (pilihan == JOptionPane.YES_OPTION) 
+        {
+            System.exit(0);
+        }
+    }//GEN-LAST:event_btnKeluarActionPerformed
+
+    /**
+     * Logika utama konversi suhu
+     */
+    private void konversiSuhu() {
+        try 
+        {
+            // 1. Handle Lokalitas: Ganti koma menjadi titik agar Java bisa membaca angka desimal
+            String inputStr = txtInput.getText().trim().replace(',', '.');
+            
+            // Validasi input dasar agar tidak error saat dihapus
+            if (inputStr.isEmpty() || inputStr.equals("-") || inputStr.equals(".")) 
+            {
+                hasilField.setText("");
                 return;
             }
 
-            double hasil = convert(asal, tujuan, nilai);
-            lblHasil.setText("Hasil: " + hasil + " " + tujuan);
+            // Parsing teks menjadi angka
+            double nilai = Double.parseDouble(inputStr);
 
-        } catch (Exception e) {
-            lblHasil.setText("Input tidak valid!");
+            // 2. Deklarasi variabel agar tidak MERAH lagi
+            String asal = comboAsal.getSelectedItem().toString();
+            String tujuan = getTujuan(); // Mengambil nilai dari radio button yang dipilih
+
+            // 3. Eksekusi perhitungan
+            if (tujuan != null) 
+            {
+                // Variabel 'hasil' dideklarasikan di sini
+                double hasil = convert(asal, tujuan, nilai);
+                
+                // 4. Tampilkan hasil dengan format pembulatan 2 angka di belakang koma
+                hasilField.setText(String.format("%.2f %s", hasil, tujuan));
+            }
+        } 
+        catch (NumberFormatException e) 
+        {
+            hasilField.setText("Input tidak valid!");
         }
     }
     
+    /**
+     * Mendapatkan skala tujuan dari radio button yang dipilih 
+     */
     private String getTujuan() {
         if (rbCelsius.isSelected()) return "Celsius";
         if (rbFahrenheit.isSelected()) return "Fahrenheit";
@@ -212,26 +316,61 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         return null;
     }
     
-    private double convert(String asal, String tujuan, double x) {
+    /**
+     * Fungsi perhitungan konversi suhu
+     */
+   private double convert(String asal, String tujuan, double x) 
+    {
         double c;
-
-        switch (asal) {
-            case "Celsius": c = x; break;
+        // Konversi dari asal ke Celsius dulu 
+        switch (asal) 
+        {
+            case "Celsius": c = x; break; 
             case "Fahrenheit": c = (x - 32) * 5/9; break;
-            case "Reamur": c = x * 5/4; break;
-            case "Kelvin": c = x - 273.15; break;
+            case "Reamur": c = x * 1.25; break; 
+            case "Kelvin": c = x - 273.15; break; 
             default: c = x;
         }
 
-        switch (tujuan) {
-            case "Celsius": return c;
+        // Konversi dari Celsius ke tujuan
+        switch (tujuan) 
+        {
+            case "Celsius": return c; 
             case "Fahrenheit": return c * 9/5 + 32;
-            case "Reamur": return c * 4/5;
-            case "Kelvin": return c + 273.15;
+            case "Reamur": return c * 0.8;
+            case "Kelvin": return c + 273.15; 
+            default: return 0;
         }
-
-        return 0;
     }
+   
+    /**
+     * Validasi untuk menangani input lewat paste dan filter karakter
+     */
+    private void setupInputValidation() 
+    {
+        ((AbstractDocument) txtInput.getDocument()).setDocumentFilter(new DocumentFilter() 
+        {
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException 
+            {
+                // PERBAIKAN: Tambahkan karakter koma (,) ke dalam matches
+                if (text == null || text.isEmpty() || text.matches("[0-9.,-]+")) 
+                {
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            }
+            
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException 
+            {
+                if (string == null || string.isEmpty() || string.matches("[0-9.,-]+")) 
+                {
+                    super.insertString(fb, offset, string, attr);
+                }
+            }
+        });
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -268,16 +407,16 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnKonversi;
+    private javax.swing.JButton btnKeluar;
+    private javax.swing.JButton btnReset;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> comboAsal;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JTextField hasilField;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JLabel lblHasil;
     private javax.swing.JRadioButton rbCelsius;
     private javax.swing.JRadioButton rbFahrenheit;
     private javax.swing.JRadioButton rbKelvin;
